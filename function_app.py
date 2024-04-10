@@ -12,14 +12,7 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
     print(readings)
     name = req_body.get('name')
     print(name)
-    # if not name:
-    #     try:
-    #         req_body = req.get_json()
-    #     except ValueError:
-    #         pass
-    #     else:
-    #         name = req_body.get('name')
-    # for r in readings:
-    #     print(r)
+    for r in readings:
+        print(r)
 
-    return func.HttpResponse(f"Hello, {readings}. This HTTP triggered function executed successfully.")
+    return func.HttpResponse(readings)
