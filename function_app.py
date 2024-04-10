@@ -1,5 +1,6 @@
 import azure.functions as func
 import logging
+import json
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -9,10 +10,8 @@ def http_trigger(req: func.HttpRequest) -> func.HttpResponse:
 
     req_body = req.get_json()
     readings = req_body.get('readings')
-    print(readings)
-    name = req_body.get('name')
-    print(name)
-    for r in readings:
-        print(r)
-
-    return func.HttpResponse(readings)
+    # for r in readings:
+    #     r['status'] = 'ok'
+    response_dict = {"readings": readings}
+    response_body = json.dumps(response_dict, indent=2)
+    return func.HttpResponse(body=response_body, mimetype="application/json")
