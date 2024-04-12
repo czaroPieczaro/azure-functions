@@ -1,16 +1,16 @@
 import azure.functions as func
 import logging
+from azure.functions.decorators.core import DataType
+import uuid
 
 app = func.FunctionApp()
 
 @app.function_name(name="HttpTrigger1")
 @app.route(route="hello", auth_level=func.AuthLevel.ANONYMOUS)
-@app.queue_output(arg_name="msg", queue_name="outqueue", connection="AzureWebJobsStorage")
-@app.cosmos_db_output(arg_name="outputDocument", database_name="my-database", container_name="my-container", connection="CosmosDbConnectionSetting")
-def test_function(req: func.HttpRequest, msg: func.Out[func.QueueMessage],
-    outputDocument: func.Out[func.Document]) -> func.HttpResponse:
+@app.generic_output_binding(arg_name="toDoItems", type="sql", CommandText="dbo.ToDo", ConnectionStringSetting="SqlConnectionString",
+    data_type=DataType.STRING)
+def test_function(req: func.HttpRequest, toDoItems: func.Out[func.SqlRow]) -> func.HttpResponse:
      logging.info('Python HTTP trigger function processed a request.')
-     logging.info('Python Cosmos DB trigger function processed a request.')
      name = req.params.get('name')
      if not name:
         try:
@@ -21,8 +21,7 @@ def test_function(req: func.HttpRequest, msg: func.Out[func.QueueMessage],
             name = req_body.get('name')
 
      if name:
-        outputDocument.set(func.Document.from_dict({"id": name}))
-        msg.set(name)
+        toDoItems.set(func.SqlRow({"Id":str(uuid.uuid4()), "title": name, "completed": False, "url": ""}))
         return func.HttpResponse(f"Hello {name}!")
      else:
         return func.HttpResponse(
